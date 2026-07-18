@@ -1,0 +1,233 @@
+<style>
+  :root{
+    --madera:#331e0f;
+    --brasa:#4f2215;
+    --carbon:#212020;
+    --hueso:#cbb8a7;
+    --crema:#fff6ee;
+    --blanco:#fffcfa;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--crema);
+    color:var(--madera);
+    font-family:-apple-system,'Segoe UI',sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+  .stage{ width:100%; max-width:400px; }
+  .header{
+    text-align:center;
+    padding-bottom:20px;
+    margin-bottom:26px;
+    border-bottom:1px solid rgba(51,30,15,0.15);
+  }
+  .header .mark{
+    font-size:11px; letter-spacing:0.3em; text-transform:uppercase;
+    color:var(--brasa); font-weight:700;
+  }
+  .header .occ{
+    font-size:11px; letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--brasa); opacity:0.55; margin-top:4px;
+  }
+  .ticket{
+    background:var(--blanco); color:var(--carbon);
+    border-radius:2px; position:relative;
+    box-shadow:0 14px 34px rgba(51,30,15,0.14);
+    border:1px solid rgba(51,30,15,0.08);
+  }
+  .ticket::before, .ticket::after{
+    content:""; position:absolute; left:0; right:0; height:10px;
+    background: linear-gradient(135deg, var(--blanco) 50%, transparent 50%) 0 0/14px 14px repeat-x;
+  }
+  .ticket::before{ top:-1px; transform:translateY(-100%); }
+  .ticket::after{ bottom:-1px; transform:translateY(100%) rotate(180deg); }
+  .ticket-inner{ padding:30px 26px 26px; }
+  .t-row{
+    display:flex; justify-content:space-between;
+    font-family:'SF Mono',Consolas,monospace; font-size:10.5px; letter-spacing:0.05em;
+    color:var(--brasa); opacity:0.65; margin-bottom:18px;
+  }
+  .t-divider{ border-top:1px dashed rgba(51,30,15,0.2); margin:18px 0; }
+  .t-title{ font-size:24px; font-weight:800; letter-spacing:-0.01em; margin:0 0 6px; color:var(--madera); }
+  .t-sub{ font-size:14.5px; line-height:1.5; color:var(--brasa); margin:0; }
+  .t-item{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:'SF Mono',Consolas,monospace; font-size:13px; padding:10px 0;
+  }
+  .t-item .name{ font-weight:700; letter-spacing:0.01em; color:var(--madera); }
+  .t-item .qty{ color:var(--brasa); opacity:0.55; }
+  .t-stamp{
+    display:inline-block; margin-top:16px;
+    border:1.5px solid var(--brasa); color:var(--brasa);
+    font-family:'SF Mono',Consolas,monospace; font-size:10.5px; letter-spacing:0.15em;
+    text-transform:uppercase; padding:5px 10px; border-radius:3px; transform:rotate(-3deg);
+  }
+  .t-stamp.late{ border-color:var(--hueso); color:var(--brasa); opacity:0.6; }
+  .t-foot{
+    font-family:'SF Mono',Consolas,monospace; font-size:10.5px;
+    color:var(--brasa); opacity:0.6; margin-top:20px; line-height:1.5;
+  }
+  .footprint{
+    text-align:center; margin-top:22px;
+    font-family:'SF Mono',Consolas,monospace; font-size:10.5px; letter-spacing:0.1em;
+    color:var(--brasa); opacity:0.4;
+  }
+  .admin-link{
+    display:block; text-align:center; margin-top:14px;
+    font-family:'SF Mono',Consolas,monospace; font-size:10px; letter-spacing:0.08em;
+    color:var(--brasa); opacity:0.35; text-decoration:none;
+  }
+  .admin-ticket .qr-wrap{
+    background:var(--blanco); border:1px solid rgba(51,30,15,0.1);
+    padding:16px; display:inline-block; margin:16px 0 4px;
+  }
+  .url-box{
+    font-family:'SF Mono',Consolas,monospace; font-size:10.5px; color:var(--brasa);
+    opacity:0.65; word-break:break-all; margin-top:12px;
+    background:rgba(51,30,15,0.05); border-radius:6px; padding:8px 10px;
+  }
+  .btn{
+    width:100%; font-family:'SF Mono',Consolas,monospace; font-size:11.5px; font-weight:700;
+    letter-spacing:0.05em; text-transform:uppercase; padding:12px 14px; border-radius:3px;
+    border:1.5px solid var(--brasa); background:transparent; color:var(--brasa); cursor:pointer; margin-top:16px;
+  }
+  .btn:hover{ background:var(--brasa); color:var(--crema); }
+  .loading{
+    text-align:center; font-family:'SF Mono',Consolas,monospace; font-size:11px;
+    letter-spacing:0.1em; color:var(--brasa); opacity:0.5;
+  }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<div class="stage" id="stage">
+  <div class="header"><div class="mark">Pampa Parrilla</div><div class="occ">Día del Amigo</div></div>
+  <div class="loading">Encendiendo la parrilla…</div>
+</div>
+
+<script>
+(function(){
+  const stage = document.getElementById('stage');
+  const isAdmin = false;
+  const COUNTER_KEY = 'amigo_qr_pampa_contador';
+  const RESULT_KEY = 'amigo_qr_pampa_resultado';
+  const MAX_WINNERS = 2;
+
+  const PUBLIC_URL = 'https://claude.ai/public/artifacts/67c6ec5c-4538-4200-aa55-b40f0d75974f';
+  function baseUrl(){ return PUBLIC_URL; }
+  function now(){ return '20/07'; }
+  function header(){ return `<div class="header"><div class="mark">Pampa Parrilla</div><div class="occ">Día del Amigo</div></div>`; }
+
+  function renderAdmin(){
+    stage.innerHTML = `
+      ${header()}
+      <div class="ticket admin-ticket">
+        <div class="ticket-inner">
+          <div class="t-row"><span>PANEL</span><span>${now()}</span></div>
+          <div class="t-title">Comanda del juego</div>
+          <p class="t-sub" id="adminCount">cargando…</p>
+          <div style="text-align:center;"><div id="qrTarget" class="qr-wrap"></div></div>
+          <div class="url-box">${baseUrl()}</div>
+          <button class="btn" id="resetBtn">Reiniciar juego</button>
+          <div class="t-foot">Este es el QR para imprimir y pegar en el local — apunta al link normal de la página.<br><br>Para volver a entrar acá, hacé triple clic en el encabezado "Pampa Parrilla" de arriba de todo. Esta vista es solo para el equipo, no la compartan.</div>
+        </div>
+      </div>
+    `;
+    new QRCode(document.getElementById('qrTarget'), { text: baseUrl(), width:190, height:190, colorDark:'#331e0f', colorLight:'#fffcfa' });
+    refreshAdminCount();
+    document.getElementById('resetBtn').addEventListener('click', async ()=>{
+      try{ await window.storage.delete(COUNTER_KEY, true); }catch(e){}
+      refreshAdminCount();
+    });
+  }
+
+  async function refreshAdminCount(){
+    const el = document.getElementById('adminCount');
+    let count = 0;
+    try{
+      const r = await window.storage.get(COUNTER_KEY, true);
+      count = r ? parseInt(r.value, 10) || 0 : 0;
+    }catch(e){ count = 0; }
+    el.textContent = count + ' de ' + MAX_WINNERS + ' catenas zapata entregadas.';
+  }
+
+  function renderWin(){
+    stage.innerHTML = `
+      ${header()}
+      <div class="ticket">
+        <div class="ticket-inner">
+          <div class="t-row"><span>COMANDA #01</span><span>${now()}</span></div>
+          <div class="t-title">¡Ganaste!</div>
+          <p class="t-sub">Llegaste entre los primeros al fuego.</p>
+          <div class="t-divider"></div>
+          <div class="t-item"><span class="name">Catena zapata</span><span class="qty">x1</span></div>
+          <div class="t-divider"></div>
+          <span class="t-stamp">Premio confirmado</span>
+          <div class="t-foot">Mostrá esta pantalla en la barra para retirar tu premio.<br>Feliz Día del Amigo — Pampa Parrilla.</div>
+        </div>
+      </div>
+      <div class="footprint">Sarandí · @pampa.parrilla</div>
+    `;
+  }
+
+  function renderLate(){
+    stage.innerHTML = `
+      ${header()}
+      <div class="ticket">
+        <div class="ticket-inner">
+          <div class="t-row"><span>COMANDA</span><span>${now()}</span></div>
+          <div class="t-title">Llegaste tarde</div>
+          <p class="t-sub">Las 2 catenas zapata ya se entregaron. El fuego no espera a nadie.</p>
+          <div class="t-divider"></div>
+          <span class="t-stamp late">Sin stock</span>
+          <div class="t-foot">Seguinos para no perderte el próximo sorteo con amigos.<br>Pampa Parrilla.</div>
+        </div>
+      </div>
+      <div class="footprint">Sarandí · @pampa.parrilla</div>
+    `;
+  }
+
+  async function play(){
+    try{
+      const prev = await window.storage.get(RESULT_KEY, false);
+      if(prev && prev.value){ prev.value === 'gano' ? renderWin() : renderLate(); return; }
+    }catch(e){}
+    let count = 0;
+    try{
+      const r = await window.storage.get(COUNTER_KEY, true);
+      count = r ? parseInt(r.value, 10) || 0 : 0;
+    }catch(e){ count = 0; }
+    if(count < MAX_WINNERS){
+      try{
+        await window.storage.set(COUNTER_KEY, String(count + 1), true);
+        await window.storage.set(RESULT_KEY, 'gano', false);
+      }catch(e){}
+      renderWin();
+    }else{
+      try{ await window.storage.set(RESULT_KEY, 'tarde', false); }catch(e){}
+      renderLate();
+    }
+  }
+
+  if(isAdmin){ renderAdmin(); } else { play(); }
+
+  // gesto secreto: tres clics seguidos en el encabezado abren el panel con el QR
+  let clicks = [];
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.header')) return;
+    const t = Date.now();
+    clicks.push(t);
+    clicks = clicks.filter(x => t - x < 1200);
+    if(clicks.length >= 3){
+      clicks = [];
+      renderAdmin();
+    }
+  });
+})();
+</script>
