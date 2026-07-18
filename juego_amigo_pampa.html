@@ -173,7 +173,7 @@
     const el = document.getElementById('adminCount');
     let count = 0;
     try{
-      const res = await fetch(API + '/get/' + COUNTER_KEY);
+      const res = await fetch(API + '/get/' + COUNTER_KEY + '?_=' + Date.now(), { cache: 'no-store' });
       if(res.ok){ const data = await res.json(); count = parseInt(data.value, 10) || 0; }
     }catch(e){ count = 0; }
     el.textContent = count + ' de ' + MAX_WINNERS + ' catenas zapata entregadas.';
@@ -232,7 +232,7 @@
 
     let newValue = null;
     try{
-      const res = await fetch(API + '/hit/' + COUNTER_KEY);
+      const res = await fetch(API + '/hit/' + COUNTER_KEY + '?_=' + Date.now(), { cache: 'no-store' });
       if(res.ok){ const data = await res.json(); newValue = parseInt(data.value, 10); }
     }catch(e){}
 
