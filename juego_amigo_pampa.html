@@ -219,6 +219,17 @@
     const prev = localStorage.getItem(RESULT_KEY);
     if(prev){ prev === 'gano' ? renderWin() : renderLate(); return; }
 
+    // candado: si otra pestaña de este mismo celu ya está jugando en este instante, esperamos su resultado
+    const LOCK_KEY = RESULT_KEY + '_lock';
+    if(localStorage.getItem(LOCK_KEY)){
+      for(let i=0; i<40; i++){
+        await new Promise(r => setTimeout(r, 150));
+        const r2 = localStorage.getItem(RESULT_KEY);
+        if(r2){ r2 === 'gano' ? renderWin() : renderLate(); return; }
+      }
+    }
+    localStorage.setItem(LOCK_KEY, '1');
+
     let newValue = null;
     try{
       const res = await fetch(API + '/hit/' + COUNTER_KEY);
@@ -232,6 +243,7 @@
       localStorage.setItem(RESULT_KEY, 'tarde');
       renderLate();
     }
+    localStorage.removeItem(LOCK_KEY);
   }
 
   if(isAdmin){ renderAdmin(); } else { play(); }
